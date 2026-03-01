@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { WEEKDAYS_JP } from '../utils/dateUtils';
-import { getShifts, addShift, updateShift, deleteShift } from '../utils/storage';
+import { getShifts, addShift, updateShift, deleteShift, getStaff } from '../utils/storage';
 
 const INITIAL_FORM = {
   staffName: '',
@@ -15,6 +15,7 @@ export default function ShiftManagement() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const settingsStaff = getStaff(); // 設定に登録済みスタッフ
 
   const refresh = () => setShifts(getShifts());
 
@@ -56,7 +57,7 @@ export default function ShiftManagement() {
     setShowForm(false);
   };
 
-  // Group shifts by dayOfWeek
+  // 曜日ごとにグループ化
   const grouped = WEEKDAYS_JP.map((day, i) => ({
     day,
     index: i,
@@ -66,10 +67,19 @@ export default function ShiftManagement() {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>シフト管理</h2>
+        <div>
+          <h2>シフト管理</h2>
+          <span className="shift-subtitle">レギュラーのみ</span>
+        </div>
         <button className="btn-primary" onClick={() => { setShowForm(true); setEditingId(null); setForm(INITIAL_FORM); }}>
           ＋シフト追加
         </button>
+      </div>
+
+      {/* 注意書き */}
+      <div className="shift-notice">
+        <span className="shift-notice-icon">📅</span>
+        <span>当日の変更・追加はカレンダーから行ってください。カレンダーの記録が最終決定です。</span>
       </div>
 
       {showForm && (
@@ -79,14 +89,24 @@ export default function ShiftManagement() {
             <div className="form-row">
               <div className="form-group">
                 <label>スタッフ名 *</label>
+                {/* 設定のスタッフリストから選択 or 手入力 */}
                 <input
                   type="text"
                   name="staffName"
+                  list="shift-staff-list"
                   value={form.staffName}
                   onChange={handleChange}
-                  placeholder="田中 花子"
+                  placeholder="スタッフを選択または入力"
                   required
                 />
+                <datalist id="shift-staff-list">
+                  {settingsStaff.map(s => (
+                    <option key={s.id} value={s.name} />
+                  ))}
+                </datalist>
+                {settingsStaff.length > 0 && (
+                  <span className="input-hint">設定のスタッフから選択できます</span>
+                )}
               </div>
               <div className="form-group">
                 <label>曜日 *</label>
@@ -144,7 +164,7 @@ export default function ShiftManagement() {
           </div>
         ))}
         {shifts.length === 0 && (
-          <div className="empty-state">シフトが登録されていません。上のボタンから追加してください。</div>
+          <div className="empty-state">レギュラーシフトが登録されていません。<br />毎週同じ人がいる場合は上のボタンから追加してください。</div>
         )}
       </div>
     </div>

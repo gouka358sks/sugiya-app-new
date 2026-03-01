@@ -6,6 +6,7 @@ const KEYS = {
   BUSINESS_DAYS: 'restaurant_business_days',
   STAFF: 'restaurant_staff',
   SETTINGS: 'restaurant_settings',
+  DAILY_HOURS: 'restaurant_daily_hours',
 };
 
 export const storage = {
@@ -86,8 +87,43 @@ export const updateStaff = (id, updated) => {
 export const deleteStaff = (id) => {
   const staff = getStaff();
   saveStaff(staff.filter(s => s.id !== id));
+
+  // 今日以降のカレンダー記録からそのスタッフのエントリを削除
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const all = getDailyHours();
+  let changed = false;
+  Object.keys(all).forEach(dateStr => {
+    if (dateStr >= todayStr) {
+      const filtered = all[dateStr].filter(e => e.staffId !== id);
+      if (filtered.length !== all[dateStr].length) {
+        changed = true;
+        if (filtered.length === 0) {
+          delete all[dateStr];
+        } else {
+          all[dateStr] = filtered;
+        }
+      }
+    }
+  });
+  if (changed) storage.set(KEYS.DAILY_HOURS, all);
 };
 
 // Settings
-export const getSettings = () => storage.get(KEYS.SETTINGS) || { gasUrl: '' };
+export const getSettings = () => {
+  const saved = storage.get(KEYS.SETTINGS) || {};
+  return { gasUrl: '', settingsPassword: '', ...saved };
+};
 export const saveSettings = (settings) => storage.set(KEYS.SETTINGS, settings);
+
+// Daily staff hours (array per date, supports multiple slots per person):
+// { "2026-03-01": [{ id, staffId, name, startTime, endTime }] }
+export const getDailyHours = () => storage.get(KEYS.DAILY_HOURS) || {};
+export const setDayHours = (dateStr, entries) => {
+  const all = getDailyHours();
+  if (!entries || entries.length === 0) {
+    delete all[dateStr];
+  } else {
+    all[dateStr] = entries;
+  }
+  storage.set(KEYS.DAILY_HOURS, all);
+};

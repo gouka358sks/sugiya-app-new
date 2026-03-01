@@ -356,6 +356,281 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   text-align: right;
 }
 
+/* ===== Calendar: Daily Hours ===== */
+.cell-daily-hours {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.daily-hour-tag {
+  background: #e8f8f0;
+  color: #1a7a4a;
+  border: 1px solid #a8dfc0;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+.hours-btn {
+  font-size: 11px;
+  color: #bbb;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px dashed #ddd;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.hours-btn:hover { color: #27ae60; border-color: #27ae60; background: #f0fff6; }
+.hours-btn.has-hours { color: #27ae60; border-color: #a8dfc0; background: #f0fff6; border-style: solid; }
+
+.add-reservation-btn {
+  flex: 1;
+  font-size: 10px;
+  color: #bbb;
+  text-align: center;
+  padding: 2px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  border: 1px dashed #ddd;
+}
+.add-reservation-btn:hover { color: #e67e22; border-color: #e67e22; background: #fff9f0; }
+
+/* ===== Staff Hours Modal ===== */
+.sh-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+.sh-entry {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fafafa;
+  transition: background 0.2s;
+}
+.sh-entry.sh-active {
+  background: #f0fff6;
+  border-color: #a8dfc0;
+}
+.sh-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.sh-check-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #27ae60;
+  cursor: pointer;
+}
+.sh-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #2c3e50;
+}
+.sh-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.sh-times input[type="time"] {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  outline: none;
+  width: 110px;
+}
+.sh-times input[type="time"]:focus { border-color: #27ae60; }
+.sh-sep { color: #888; }
+.sh-hrs {
+  font-size: 13px;
+  font-weight: 700;
+  color: #27ae60;
+  min-width: 36px;
+}
+
+/* ===== Password Gate ===== */
+.pin-gate {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+.pin-gate-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+.pin-lock-icon { font-size: 40px; margin-bottom: 12px; }
+.pin-gate-card h3 { font-size: 18px; color: #2c3e50; margin-bottom: 6px; }
+.pin-hint { font-size: 13px; color: #888; margin-bottom: 20px; }
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #bdc3c7;
+  background: white;
+  transition: all 0.2s;
+}
+.pin-dot.filled {
+  background: #2c3e50;
+  border-color: #2c3e50;
+  transform: scale(1.1);
+}
+.pin-error { color: #e74c3c; font-size: 13px; margin-bottom: 8px; min-height: 18px; }
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+.pin-key {
+  background: #f0f2f5;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+.pin-key:hover:not(:disabled) { background: #e0e4ea; }
+.pin-key:active:not(:disabled) { transform: scale(0.95); background: #d0d5de; }
+.pin-key-empty { visibility: hidden; }
+
+/* ===== Salary Month Nav ===== */
+.salary-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.salary-month-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+  min-width: 120px;
+  text-align: center;
+}
+.salary-hours { color: #27ae60; font-weight: 600; }
+
+/* ===== Shift Management ===== */
+.shift-subtitle {
+  display: inline-block;
+  font-size: 12px;
+  color: #888;
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-top: 2px;
+  font-weight: normal;
+}
+.shift-notice {
+  background: #fff9e6;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8a6500;
+}
+.shift-notice-icon { font-size: 16px; flex-shrink: 0; }
+.input-hint { font-size: 11px; color: #888; margin-top: 3px; }
+
+/* ===== StaffHoursModal additions ===== */
+.sh-modal { max-width: 520px; }
+.sh-empty { text-align: center; color: #999; font-size: 13px; padding: 12px 0; }
+.sh-entry-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sh-delete-btn {
+  font-size: 12px;
+  color: #e74c3c;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #f5b8b8;
+  background: #fde8e8;
+  transition: all 0.15s;
+}
+.sh-delete-btn:hover { background: #f9d0d0; }
+.sh-add-area {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.sh-add-label { font-size: 12px; color: #888; margin-bottom: 8px; font-weight: 600; }
+.sh-staff-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.sh-staff-btn {
+  background: #e8f4fd;
+  color: #2980b9;
+  border: 1px solid #a8d5f5;
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.sh-staff-btn:hover { background: #d0eaf9; }
+.sh-manual-btn { background: #f0f0f0; color: #666; border-color: #ddd; }
+.sh-add-form { padding: 8px 0; }
+.sh-add-who { font-size: 13px; color: #555; margin-bottom: 6px; }
+.sh-add-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* Password setup inline */
+.pw-setup-area { margin-top: 12px; }
+.pw-step-label { text-align: center; font-size: 14px; color: #555; margin-bottom: 8px; font-weight: 600; }
+.pw-setup-area .pin-gate { padding-top: 0; }
+.pw-setup-area .pin-gate-card {
+  box-shadow: none;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .desktop-nav { display: none; }

@@ -6,8 +6,15 @@ import {
 import {
   getReservations, addReservation, updateReservation,
   getBusinessDays, setBusinessDay, getShifts,
+  getDailyHours, setDayHours,
 } from '../utils/storage';
 import ReservationModal from './ReservationModal';
+import StaffHoursModal from './StaffHoursModal';
+
+// 開始時間が12:00より前なら午前、以降なら午後
+function getPeriod(startTime) {
+  return startTime < '12:00' ? '午前' : '午後';
+}
 
 export default function Calendar() {
   const current = getCurrentMonth();
@@ -16,7 +23,9 @@ export default function Calendar() {
   const [reservations, setReservations] = useState(getReservations);
   const [businessDays, setBusinessDays] = useState(getBusinessDays);
   const [shifts] = useState(getShifts);
-  const [modal, setModal] = useState(null); // { type: 'view'|'add', date, reservation }
+  const [dailyHours, setDailyHours] = useState(getDailyHours);
+  const [modal, setModal] = useState(null);
+  const [staffHoursDate, setStaffHoursDate] = useState(null);
 
   const isCurrentMonth = year === current.year && month === current.month;
   const today = new Date();
@@ -38,23 +47,21 @@ export default function Calendar() {
     return reservations.filter(r => r.date === ds);
   };
 
+  // レギュラーシフト（当日以降・カレンダー実績がない場合のみ表示）
   const getDateShifts = (date) => {
-    const d = date < today ? [] : shifts.filter(s => s.dayOfWeek === date.getDay());
-    return d;
+    if (date < today) return [];
+    return shifts.filter(s => s.dayOfWeek === date.getDay());
   };
 
   const handleToggleBusiness = (date) => {
     const ds = formatDate(date);
-    const current = businessDays[ds];
-    const newVal = current === undefined ? false : !current; // default open -> close on first click
+    const cur = businessDays[ds];
+    const newVal = cur === undefined ? false : !cur;
     setBusinessDay(ds, newVal);
     setBusinessDays(getBusinessDays());
   };
 
-  const isOpen = (date) => {
-    const ds = formatDate(date);
-    return businessDays[ds] !== false; // default open
-  };
+  const isOpen = (date) => businessDays[formatDate(date)] !== false;
 
   const handleSaveReservation = useCallback((form) => {
     if (modal?.reservation) {
@@ -65,6 +72,12 @@ export default function Calendar() {
     setReservations(getReservations());
     setModal(null);
   }, [modal]);
+
+  const handleSaveStaffHours = useCallback((dateStr, entries) => {
+    setDayHours(dateStr, entries);
+    setDailyHours(getDailyHours());
+    setStaffHoursDate(null);
+  }, []);
 
   const isEditable = (date) => {
     const d = new Date(date);
@@ -98,6 +111,12 @@ export default function Calendar() {
           const editable = isEditable(date);
           const dayOfWeek = date.getDay();
 
+          // 配列形式の勤務エントリ
+          const dayEntries = Array.isArray(dailyHours[ds]) ? dailyHours[ds] : [];
+          const hasHours = dayEntries.length > 0;
+          const amEntries = dayEntries.filter(e => getPeriod(e.startTime) === '午前');
+          const pmEntries = dayEntries.filter(e => getPeriod(e.startTime) === '午後');
+
           return (
             <div
               key={ds}
@@ -121,8 +140,30 @@ export default function Calendar() {
                 )}
               </div>
 
-              {/* Shifts */}
-              {open && dayShifts.length > 0 && (
+              {/* カレンダー実績勤務時間（最終決定・午前午後別表示） */}
+              {hasHours && (
+                <div className="cell-daily-hours">
+                  {amEntries.length > 0 && (
+                    <div className="shift-group">
+                      <span className="shift-period">午前:</span>
+                      {amEntries.map(e => (
+                        <span key={e.id} className="daily-hour-tag">{e.name}</span>
+                      ))}
+                    </div>
+                  )}
+                  {pmEntries.length > 0 && (
+                    <div className="shift-group">
+                      <span className="shift-period">午後:</span>
+                      {pmEntries.map(e => (
+                        <span key={e.id} className="daily-hour-tag">{e.name}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* レギュラーシフト（実績がない場合のみ参考表示） */}
+              {open && !hasHours && dayShifts.length > 0 && (
                 <div className="cell-shifts">
                   {dayShifts.filter(s => s.period === '午前').length > 0 && (
                     <div className="shift-group">
@@ -143,7 +184,7 @@ export default function Calendar() {
                 </div>
               )}
 
-              {/* Reservations */}
+              {/* 予約 */}
               {open && dayRes.length > 0 && (
                 <div className="cell-reservations">
                   {dayRes.map(r => (
@@ -158,15 +199,24 @@ export default function Calendar() {
                 </div>
               )}
 
-              {/* Add reservation button */}
-              {editable && open && (
+              {/* ボタン行 */}
+              <div className="cell-actions">
                 <button
-                  className="add-reservation-btn"
-                  onClick={() => setModal({ type: 'add', date: ds, reservation: null })}
+                  className={`hours-btn ${hasHours ? 'has-hours' : ''}`}
+                  onClick={() => setStaffHoursDate(ds)}
+                  title="勤務時間を入力・編集"
                 >
-                  ＋予約
+                  ⏱
                 </button>
-              )}
+                {editable && open && (
+                  <button
+                    className="add-reservation-btn"
+                    onClick={() => setModal({ type: 'add', date: ds, reservation: null })}
+                  >
+                    ＋予約
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -179,6 +229,15 @@ export default function Calendar() {
           readOnly={modal.type === 'view'}
           onSave={handleSaveReservation}
           onClose={() => setModal(null)}
+        />
+      )}
+
+      {staffHoursDate && (
+        <StaffHoursModal
+          dateStr={staffHoursDate}
+          dayHours={dailyHours[staffHoursDate]}
+          onSave={handleSaveStaffHours}
+          onClose={() => setStaffHoursDate(null)}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, WEEKDAYS_JP } from '../utils/dateUtils';
 import {
   getReservations, addReservation, updateReservation, deleteReservation,
 } from '../utils/storage';
@@ -63,7 +63,9 @@ export default function ReservationManagement() {
           filtered.map(r => (
             <div key={r.id} className={`reservation-item ${r.date < today ? 'past' : r.date === today ? 'today' : ''}`}>
               <div className="reservation-date">
-                <span className="date-label">{r.date}</span>
+                <span className="date-label">
+                  {r.date}({WEEKDAYS_JP[new Date(r.date + 'T00:00:00').getDay()]})
+                </span>
                 <span className="time-label">{r.time}</span>
               </div>
               <div className="reservation-info">
