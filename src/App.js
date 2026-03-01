@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DataProvider, useData } from './contexts/DataContext';
 import Calendar from './components/Calendar';
 import ShiftManagement from './components/ShiftManagement';
 import ReservationManagement from './components/ReservationManagement';
@@ -6,22 +7,32 @@ import Settings from './components/Settings';
 import './App.css';
 
 const NAV_ITEMS = [
-  { id: 'calendar', label: 'カレンダー', icon: '📅' },
-  { id: 'shifts', label: 'シフト管理', icon: '👥' },
-  { id: 'reservations', label: '予約管理', icon: '📋' },
-  { id: 'settings', label: '設定', icon: '⚙️' },
+  { id: 'calendar',     label: 'カレンダー', icon: '📅' },
+  { id: 'shifts',       label: 'シフト管理', icon: '👥' },
+  { id: 'reservations', label: '予約管理',   icon: '📋' },
+  { id: 'settings',     label: '設定',       icon: '⚙️' },
 ];
 
-function App() {
+function AppContent() {
+  const { loading } = useData();
   const [activePage, setActivePage] = useState('calendar');
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: 16 }}>
+        <div style={{ fontSize: 40 }}>🍽️</div>
+        <p style={{ color: '#666' }}>データを読み込み中...</p>
+      </div>
+    );
+  }
 
   const renderPage = () => {
     switch (activePage) {
-      case 'calendar': return <Calendar />;
-      case 'shifts': return <ShiftManagement />;
+      case 'calendar':     return <Calendar />;
+      case 'shifts':       return <ShiftManagement />;
       case 'reservations': return <ReservationManagement />;
-      case 'settings': return <Settings />;
-      default: return <Calendar />;
+      case 'settings':     return <Settings />;
+      default:             return <Calendar />;
     }
   };
 
@@ -65,4 +76,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <DataProvider>
+      <AppContent />
+    </DataProvider>
+  );
+}

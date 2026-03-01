@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { WEEKDAYS_JP } from '../utils/dateUtils';
-import { getShifts, addShift, updateShift, deleteShift, getStaff } from '../utils/storage';
+import { useData } from '../contexts/DataContext';
 
 const INITIAL_FORM = {
   staffName: '',
@@ -11,13 +11,10 @@ const INITIAL_FORM = {
 };
 
 export default function ShiftManagement() {
-  const [shifts, setShifts] = useState(getShifts);
+  const { shifts, addShift, updateShift, deleteShift, staff } = useData();
   const [form, setForm] = useState(INITIAL_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const settingsStaff = getStaff(); // 設定に登録済みスタッフ
-
-  const refresh = () => setShifts(getShifts());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +29,6 @@ export default function ShiftManagement() {
     } else {
       addShift(form);
     }
-    refresh();
     setForm(INITIAL_FORM);
     setEditingId(null);
     setShowForm(false);
@@ -47,7 +43,6 @@ export default function ShiftManagement() {
   const handleDelete = (id) => {
     if (window.confirm('このシフトを削除しますか？')) {
       deleteShift(id);
-      refresh();
     }
   };
 
@@ -57,7 +52,6 @@ export default function ShiftManagement() {
     setShowForm(false);
   };
 
-  // 曜日ごとにグループ化
   const grouped = WEEKDAYS_JP.map((day, i) => ({
     day,
     index: i,
@@ -76,7 +70,6 @@ export default function ShiftManagement() {
         </button>
       </div>
 
-      {/* 注意書き */}
       <div className="shift-notice">
         <span className="shift-notice-icon">📅</span>
         <span>当日の変更・追加はカレンダーから行ってください。カレンダーの記録が最終決定です。</span>
@@ -89,7 +82,6 @@ export default function ShiftManagement() {
             <div className="form-row">
               <div className="form-group">
                 <label>スタッフ名 *</label>
-                {/* 設定のスタッフリストから選択 or 手入力 */}
                 <input
                   type="text"
                   name="staffName"
@@ -100,11 +92,11 @@ export default function ShiftManagement() {
                   required
                 />
                 <datalist id="shift-staff-list">
-                  {settingsStaff.map(s => (
+                  {staff.map(s => (
                     <option key={s.id} value={s.name} />
                   ))}
                 </datalist>
-                {settingsStaff.length > 0 && (
+                {staff.length > 0 && (
                   <span className="input-hint">設定のスタッフから選択できます</span>
                 )}
               </div>

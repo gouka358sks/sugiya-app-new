@@ -3,15 +3,10 @@ import {
   formatDate, getMonthDays, isToday, WEEKDAYS_JP,
   formatMonthYear, getCurrentMonth,
 } from '../utils/dateUtils';
-import {
-  getReservations, addReservation, updateReservation,
-  getBusinessDays, setBusinessDay, getShifts,
-  getDailyHours, setDayHours,
-} from '../utils/storage';
+import { useData } from '../contexts/DataContext';
 import ReservationModal from './ReservationModal';
 import StaffHoursModal from './StaffHoursModal';
 
-// 開始時間が12:00より前なら午前、以降なら午後
 function getPeriod(startTime) {
   return startTime < '12:00' ? '午前' : '午後';
 }
@@ -20,12 +15,15 @@ export default function Calendar() {
   const current = getCurrentMonth();
   const [year, setYear] = useState(current.year);
   const [month, setMonth] = useState(current.month);
-  const [reservations, setReservations] = useState(getReservations);
-  const [businessDays, setBusinessDays] = useState(getBusinessDays);
-  const [shifts] = useState(getShifts);
-  const [dailyHours, setDailyHours] = useState(getDailyHours);
   const [modal, setModal] = useState(null);
   const [staffHoursDate, setStaffHoursDate] = useState(null);
+
+  const {
+    reservations, addReservation, updateReservation,
+    businessDays, toggleBusinessDay,
+    shifts,
+    dailyHours, saveDayHours,
+  } = useData();
 
   const isCurrentMonth = year === current.year && month === current.month;
   const today = new Date();
@@ -47,18 +45,9 @@ export default function Calendar() {
     return reservations.filter(r => r.date === ds);
   };
 
-  // レギュラーシフト（当日以降・カレンダー実績がない場合のみ表示）
   const getDateShifts = (date) => {
     if (date < today) return [];
     return shifts.filter(s => s.dayOfWeek === date.getDay());
-  };
-
-  const handleToggleBusiness = (date) => {
-    const ds = formatDate(date);
-    const cur = businessDays[ds];
-    const newVal = cur === undefined ? false : !cur;
-    setBusinessDay(ds, newVal);
-    setBusinessDays(getBusinessDays());
   };
 
   const isOpen = (date) => businessDays[formatDate(date)] !== false;
@@ -69,15 +58,13 @@ export default function Calendar() {
     } else {
       addReservation(form);
     }
-    setReservations(getReservations());
     setModal(null);
-  }, [modal]);
+  }, [modal, addReservation, updateReservation]);
 
   const handleSaveStaffHours = useCallback((dateStr, entries) => {
-    setDayHours(dateStr, entries);
-    setDailyHours(getDailyHours());
+    saveDayHours(dateStr, entries);
     setStaffHoursDate(null);
-  }, []);
+  }, [saveDayHours]);
 
   const isEditable = (date) => {
     const d = new Date(date);
@@ -111,7 +98,6 @@ export default function Calendar() {
           const editable = isEditable(date);
           const dayOfWeek = date.getDay();
 
-          // 配列形式の勤務エントリ
           const dayEntries = Array.isArray(dailyHours[ds]) ? dailyHours[ds] : [];
           const hasHours = dayEntries.length > 0;
           const amEntries = dayEntries.filter(e => getPeriod(e.startTime) === '午前');
@@ -127,7 +113,7 @@ export default function Calendar() {
                 {editable && (
                   <button
                     className={`business-toggle ${open ? 'open' : 'closed'}`}
-                    onClick={() => handleToggleBusiness(date)}
+                    onClick={() => toggleBusinessDay(ds)}
                     title={open ? '営業日' : '定休日'}
                   >
                     {open ? '営業' : '定休'}
@@ -140,7 +126,6 @@ export default function Calendar() {
                 )}
               </div>
 
-              {/* カレンダー実績勤務時間（最終決定・午前午後別表示） */}
               {hasHours && (
                 <div className="cell-daily-hours">
                   {amEntries.length > 0 && (
@@ -162,7 +147,6 @@ export default function Calendar() {
                 </div>
               )}
 
-              {/* レギュラーシフト（実績がない場合のみ参考表示） */}
               {open && !hasHours && dayShifts.length > 0 && (
                 <div className="cell-shifts">
                   {dayShifts.filter(s => s.period === '午前').length > 0 && (
@@ -184,7 +168,6 @@ export default function Calendar() {
                 </div>
               )}
 
-              {/* 予約 */}
               {open && dayRes.length > 0 && (
                 <div className="cell-reservations">
                   {dayRes.map(r => (
@@ -199,7 +182,6 @@ export default function Calendar() {
                 </div>
               )}
 
-              {/* ボタン行 */}
               <div className="cell-actions">
                 <button
                   className={`hours-btn ${hasHours ? 'has-hours' : ''}`}
