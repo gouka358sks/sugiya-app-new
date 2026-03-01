@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-  getSettings, saveSettings, getStaff, addStaff, updateStaff, deleteStaff,
-  getReservations, getDailyHours,
-} from '../utils/storage';
+import { useData } from '../contexts/DataContext';
 import { backupReservations, backupSalary } from '../utils/gasApi';
 import { formatDate, getCurrentMonth } from '../utils/dateUtils';
 
@@ -62,21 +59,17 @@ function PinPad({ onSuccess, title }) {
 
 // ===== Salary calculation helpers =====
 function getPayPeriod(year, month) {
-  // month: 0-indexed (0=January)
-  // Period: 26th of previous month to 25th of this month
-  const start = new Date(year, month - 1, 26); // handles month=0 → Dec of prev year
+  const start = new Date(year, month - 1, 26);
   const end = new Date(year, month, 25);
   return { start, end };
 }
 
-function calcStaffHoursInPeriod(staffId, periodStart, periodEnd) {
-  const allHours = getDailyHours();
+function calcStaffHoursInPeriod(staffId, periodStart, periodEnd, allHours) {
   const startStr = formatDate(periodStart);
   const endStr = formatDate(periodEnd);
   let total = 0;
   Object.entries(allHours).forEach(([dateStr, entries]) => {
     if (dateStr < startStr || dateStr > endStr) return;
-    // 配列形式のみ対応
     if (!Array.isArray(entries)) return;
     entries
       .filter(e => e.staffId === staffId)
@@ -93,9 +86,13 @@ const INITIAL_STAFF_FORM = { name: '', hourlyWage: 1000 };
 
 // ===== Main Settings Component =====
 export default function Settings() {
-  const [settings, setSettings] = useState(getSettings);
-  const [unlocked, setUnlocked] = useState(() => !getSettings().settingsPassword);
-  const [staff, setStaff] = useState(getStaff);
+  const {
+    settings, saveSettings,
+    staff, addStaff, updateStaff, deleteStaff,
+    reservations, dailyHours,
+  } = useData();
+
+  const [unlocked, setUnlocked] = useState(() => !settings.settingsPassword);
   const [staffForm, setStaffForm] = useState(INITIAL_STAFF_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showStaffForm, setShowStaffForm] = useState(false);
@@ -103,7 +100,7 @@ export default function Settings() {
 
   // Password change state
   const [showPwSection, setShowPwSection] = useState(false);
-  const [pwStep, setPwStep] = useState('new'); // 'current' | 'new' | 'confirm'
+  const [pwStep, setPwStep] = useState('new');
   const [pwNew, setPwNew] = useState('');
   const [pwError, setPwError] = useState('');
 
@@ -130,11 +127,8 @@ export default function Settings() {
   // ===== Handlers =====
   const handleSettingsChange = (e) => {
     const updated = { ...settings, [e.target.name]: e.target.value };
-    setSettings(updated);
     saveSettings(updated);
   };
-
-  const refreshStaff = () => setStaff(getStaff());
 
   const handleStaffSubmit = (e) => {
     e.preventDefault();
@@ -144,7 +138,6 @@ export default function Settings() {
     } else {
       addStaff(staffForm);
     }
-    refreshStaff();
     setStaffForm(INITIAL_STAFF_FORM);
     setEditingId(null);
     setShowStaffForm(false);
@@ -159,7 +152,6 @@ export default function Settings() {
   const handleStaffDelete = (id) => {
     if (window.confirm('このスタッフを削除しますか？')) {
       deleteStaff(id);
-      refreshStaff();
     }
   };
 
@@ -167,7 +159,7 @@ export default function Settings() {
   const { start: periodStart, end: periodEnd } = getPayPeriod(salaryYear, salaryMonth);
 
   const salaryData = staff.map(s => {
-    const hours = calcStaffHoursInPeriod(s.id, periodStart, periodEnd);
+    const hours = calcStaffHoursInPeriod(s.id, periodStart, periodEnd, dailyHours);
     return { ...s, hours, salary: Math.round(s.hourlyWage * hours) };
   });
 
@@ -197,9 +189,7 @@ export default function Settings() {
       setPwError('');
     } else if (pwStep === 'confirm') {
       if (pin === pwNew) {
-        const updated = { ...settings, settingsPassword: pin };
-        setSettings(updated);
-        saveSettings(updated);
+        saveSettings({ ...settings, settingsPassword: pin });
         setShowPwSection(false);
         setPwStep('new');
         setPwNew('');
@@ -215,9 +205,7 @@ export default function Settings() {
 
   const handleRemovePassword = () => {
     if (window.confirm('パスワードを削除しますか？')) {
-      const updated = { ...settings, settingsPassword: '' };
-      setSettings(updated);
-      saveSettings(updated);
+      saveSettings({ ...settings, settingsPassword: '' });
     }
   };
 
@@ -225,7 +213,7 @@ export default function Settings() {
   const handleBackupReservations = async () => {
     try {
       setBackupStatus('送信中...');
-      await backupReservations(settings.gasUrl, getReservations());
+      await backupReservations(settings.gasUrl, reservations);
       setBackupStatus('予約データをバックアップしました ✓');
     } catch (e) {
       setBackupStatus(`エラー: ${e.message}`);
