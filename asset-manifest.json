@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/sugiya-app-new/static/css/main.5efef4db.css",
-    "main.js": "/sugiya-app-new/static/js/main.655db4d0.js",
+    "main.js": "/sugiya-app-new/static/js/main.3c943fd0.js",
     "static/js/453.4561a96a.chunk.js": "/sugiya-app-new/static/js/453.4561a96a.chunk.js",
     "index.html": "/sugiya-app-new/index.html",
     "main.5efef4db.css.map": "/sugiya-app-new/static/css/main.5efef4db.css.map",
-    "main.655db4d0.js.map": "/sugiya-app-new/static/js/main.655db4d0.js.map",
+    "main.3c943fd0.js.map": "/sugiya-app-new/static/js/main.3c943fd0.js.map",
     "453.4561a96a.chunk.js.map": "/sugiya-app-new/static/js/453.4561a96a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5efef4db.css",
-    "static/js/main.655db4d0.js"
+    "static/js/main.3c943fd0.js"
   ]
 }
