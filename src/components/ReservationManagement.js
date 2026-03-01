@@ -1,12 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { formatDate, WEEKDAYS_JP } from '../utils/dateUtils';
-import { useData } from '../contexts/DataContext';
+import {
+  getReservations, addReservation, updateReservation, deleteReservation,
+} from '../utils/storage';
 import ReservationModal from './ReservationModal';
 
 export default function ReservationManagement() {
-  const { reservations, addReservation, updateReservation, deleteReservation } = useData();
+  const [reservations, setReservations] = useState(getReservations);
   const [modal, setModal] = useState(null);
   const [search, setSearch] = useState('');
+
+  const refresh = () => setReservations(getReservations());
 
   const handleSave = useCallback((form) => {
     if (modal?.reservation) {
@@ -14,12 +18,14 @@ export default function ReservationManagement() {
     } else {
       addReservation(form);
     }
+    refresh();
     setModal(null);
-  }, [modal, addReservation, updateReservation]);
+  }, [modal]);
 
   const handleDelete = (id) => {
     if (window.confirm('この予約を削除しますか？')) {
       deleteReservation(id);
+      refresh();
     }
   };
 

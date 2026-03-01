@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { WEEKDAYS_JP } from '../utils/dateUtils';
-import { useData } from '../contexts/DataContext';
+import { getShifts, addShift, updateShift, deleteShift, getStaff } from '../utils/storage';
 
 const INITIAL_FORM = {
   staffName: '',
@@ -11,10 +11,13 @@ const INITIAL_FORM = {
 };
 
 export default function ShiftManagement() {
-  const { shifts, addShift, updateShift, deleteShift, staff } = useData();
+  const [shifts, setShifts] = useState(getShifts);
   const [form, setForm] = useState(INITIAL_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const settingsStaff = getStaff(); // 設定に登録済みスタッフ
+
+  const refresh = () => setShifts(getShifts());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +32,7 @@ export default function ShiftManagement() {
     } else {
       addShift(form);
     }
+    refresh();
     setForm(INITIAL_FORM);
     setEditingId(null);
     setShowForm(false);
@@ -43,6 +47,7 @@ export default function ShiftManagement() {
   const handleDelete = (id) => {
     if (window.confirm('このシフトを削除しますか？')) {
       deleteShift(id);
+      refresh();
     }
   };
 
@@ -84,6 +89,7 @@ export default function ShiftManagement() {
             <div className="form-row">
               <div className="form-group">
                 <label>スタッフ名 *</label>
+                {/* 設定のスタッフリストから選択 or 手入力 */}
                 <input
                   type="text"
                   name="staffName"
@@ -94,11 +100,11 @@ export default function ShiftManagement() {
                   required
                 />
                 <datalist id="shift-staff-list">
-                  {staff.map(s => (
+                  {settingsStaff.map(s => (
                     <option key={s.id} value={s.name} />
                   ))}
                 </datalist>
-                {staff.length > 0 && (
+                {settingsStaff.length > 0 && (
                   <span className="input-hint">設定のスタッフから選択できます</span>
                 )}
               </div>

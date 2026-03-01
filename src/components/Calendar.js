@@ -3,7 +3,11 @@ import {
   formatDate, getMonthDays, isToday, WEEKDAYS_JP,
   formatMonthYear, getCurrentMonth,
 } from '../utils/dateUtils';
-import { useData } from '../contexts/DataContext';
+import {
+  getReservations, addReservation, updateReservation,
+  getBusinessDays, setBusinessDay, getShifts,
+  getDailyHours, setDayHours,
+} from '../utils/storage';
 import ReservationModal from './ReservationModal';
 import StaffHoursModal from './StaffHoursModal';
 
@@ -16,15 +20,12 @@ export default function Calendar() {
   const current = getCurrentMonth();
   const [year, setYear] = useState(current.year);
   const [month, setMonth] = useState(current.month);
+  const [reservations, setReservations] = useState(getReservations);
+  const [businessDays, setBusinessDays] = useState(getBusinessDays);
+  const [shifts] = useState(getShifts);
+  const [dailyHours, setDailyHours] = useState(getDailyHours);
   const [modal, setModal] = useState(null);
   const [staffHoursDate, setStaffHoursDate] = useState(null);
-
-  const {
-    reservations, addReservation, updateReservation,
-    businessDays, toggleBusinessDay,
-    shifts,
-    dailyHours, saveDayHours,
-  } = useData();
 
   const isCurrentMonth = year === current.year && month === current.month;
   const today = new Date();
@@ -53,7 +54,11 @@ export default function Calendar() {
   };
 
   const handleToggleBusiness = (date) => {
-    toggleBusinessDay(formatDate(date));
+    const ds = formatDate(date);
+    const cur = businessDays[ds];
+    const newVal = cur === undefined ? false : !cur;
+    setBusinessDay(ds, newVal);
+    setBusinessDays(getBusinessDays());
   };
 
   const isOpen = (date) => businessDays[formatDate(date)] !== false;
@@ -64,13 +69,15 @@ export default function Calendar() {
     } else {
       addReservation(form);
     }
+    setReservations(getReservations());
     setModal(null);
-  }, [modal, addReservation, updateReservation]);
+  }, [modal]);
 
   const handleSaveStaffHours = useCallback((dateStr, entries) => {
-    saveDayHours(dateStr, entries);
+    setDayHours(dateStr, entries);
+    setDailyHours(getDailyHours());
     setStaffHoursDate(null);
-  }, [saveDayHours]);
+  }, []);
 
   const isEditable = (date) => {
     const d = new Date(date);

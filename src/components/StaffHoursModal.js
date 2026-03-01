@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useData } from '../contexts/DataContext';
+import { getStaff, getShifts } from '../utils/storage';
 
 function calcHours(startTime, endTime) {
   const [sh, sm] = startTime.split(':').map(Number);
@@ -10,7 +10,8 @@ function calcHours(startTime, endTime) {
 const EMPTY_ADD = { staffId: '', name: '', startTime: '09:00', endTime: '18:00' };
 
 export default function StaffHoursModal({ dateStr, dayHours, onSave, onClose }) {
-  const { staff, shifts } = useData();
+  const settingsStaff = getStaff();     // 設定で登録済みスタッフ
+  const shifts = getShifts();           // レギュラーシフト（デフォルト時間用）
 
   const dateObj = new Date(dateStr + 'T00:00:00');
   const dayOfWeek = dateObj.getDay();
@@ -132,7 +133,7 @@ export default function StaffHoursModal({ dateStr, dayHours, onSave, onClose }) 
             <>
               <p className="sh-add-label">スタッフを追加:</p>
               <div className="sh-staff-buttons">
-                {staff.map(s => (
+                {settingsStaff.map(s => (
                   <button
                     key={s.id}
                     className="sh-staff-btn"
@@ -141,7 +142,7 @@ export default function StaffHoursModal({ dateStr, dayHours, onSave, onClose }) 
                     ＋ {s.name}
                   </button>
                 ))}
-                {staff.length === 0 && (
+                {settingsStaff.length === 0 && (
                   <button
                     className="sh-staff-btn sh-manual-btn"
                     onClick={() => { setAddForm(EMPTY_ADD); setShowAddForm(true); }}
@@ -165,7 +166,7 @@ export default function StaffHoursModal({ dateStr, dayHours, onSave, onClose }) 
                     autoFocus
                   />
                   <datalist id="sh-staff-datalist">
-                    {staff.map(s => <option key={s.id} value={s.name} />)}
+                    {settingsStaff.map(s => <option key={s.id} value={s.name} />)}
                   </datalist>
                 </div>
               )}
