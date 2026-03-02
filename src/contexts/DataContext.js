@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
 import { ref, set, get, onValue } from 'firebase/database';
+import { REGULAR_HOLIDAY_DAYS } from '../utils/dateUtils';
 
 // localStorage keys for one-time migration
 const LS = {
@@ -127,9 +128,11 @@ export function DataProvider({ children }) {
 
   // --- Business days ---
   const toggleBusinessDay = useCallback((dateStr) => {
-    const cur = businessDays[dateStr];
-    const newVal = cur === undefined ? false : !cur;
-    set(ref(db, `businessDays/${dateStr}`), newVal);
+    const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+    const defaultOpen = !REGULAR_HOLIDAY_DAYS.includes(dayOfWeek);
+    const stored = businessDays[dateStr];
+    const currentlyOpen = stored !== undefined ? stored : defaultOpen;
+    set(ref(db, `businessDays/${dateStr}`), !currentlyOpen);
   }, [businessDays]);
 
   // --- Daily hours ---

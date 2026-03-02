@@ -1,4 +1,4 @@
-// Google Apps Script - 飲食店管理アプリ バックアップスクリプト
+// Google Apps Script - すぎやシフト・予約アプリ バックアップスクリプト
 // このファイルをGoogle Apps ScriptでWebアプリとしてデプロイしてください
 
 const SPREADSHEET_ID = ''; // ← あなたのスプレッドシートIDを入力
@@ -68,6 +68,6 @@ function saveSalary(salaryData, timestamp) {
 
 function doGet(e) {
   return ContentService
-    .createTextOutput('飲食店管理アプリ バックアップAPI')
+    .createTextOutput('すぎやシフト・予約アプリ バックアップAPI')
     .setMimeType(ContentService.MimeType.TEXT);
 }

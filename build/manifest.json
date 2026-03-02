@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "すぎやアプリ",
+  "name": "すぎやシフト/予約アプリ",
   "icons": [
     {
       "src": "favicon.ico",

@@ -2,6 +2,9 @@
 
 export const WEEKDAYS_JP = ['日', '月', '火', '水', '木', '金', '土'];
 
+// 定休曜日: 0=日曜, 3=水曜
+export const REGULAR_HOLIDAY_DAYS = [0, 3];
+
 export const formatDate = (date) => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');

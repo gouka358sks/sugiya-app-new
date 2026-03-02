@@ -40,7 +40,7 @@ function AppContent() {
     <div className="app">
       {/* Header */}
       <header className="app-header">
-        <h1 className="app-title">🍽️ 飲食店管理</h1>
+        <h1 className="app-title">🍽️ すぎやシフト/予約アプリ</h1>
         <nav className="desktop-nav">
           {NAV_ITEMS.map(item => (
             <button

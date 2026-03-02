@@ -35,7 +35,10 @@ export default function ReservationManagement() {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>予約管理</h2>
+        <div>
+          <p className="page-app-name">すぎやシフト/予約アプリ</p>
+          <h2>予約管理</h2>
+        </div>
         <button className="btn-primary" onClick={() => setModal({ reservation: null })}>
           ＋予約追加
         </button>

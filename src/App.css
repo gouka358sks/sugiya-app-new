@@ -65,6 +65,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .page-container { max-width: 900px; margin: 0 auto; }
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .page-header h2 { font-size: 20px; color: #2c3e50; }
+.page-app-name { font-size: 11px; color: #999; margin: 0 0 4px; letter-spacing: 0.03em; }
 
 /* ===== Buttons ===== */
 .btn-primary {

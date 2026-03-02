@@ -212,6 +212,7 @@ export default function Settings() {
 
   return (
     <div className="page-container">
+      <p className="page-app-name">すぎやシフト/予約アプリ</p>
       <h2>設定</h2>
 
       {/* Password Section */}

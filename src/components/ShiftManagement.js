@@ -62,6 +62,7 @@ export default function ShiftManagement() {
     <div className="page-container">
       <div className="page-header">
         <div>
+          <p className="page-app-name">すぎやシフト/予約アプリ</p>
           <h2>シフト管理</h2>
           <span className="shift-subtitle">レギュラーのみ</span>
         </div>

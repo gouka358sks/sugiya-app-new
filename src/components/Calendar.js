@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   formatDate, getMonthDays, isToday, WEEKDAYS_JP,
-  formatMonthYear, getCurrentMonth,
+  formatMonthYear, getCurrentMonth, REGULAR_HOLIDAY_DAYS,
 } from '../utils/dateUtils';
 import { useData } from '../contexts/DataContext';
 import ReservationModal from './ReservationModal';
@@ -50,7 +50,11 @@ export default function Calendar() {
     return shifts.filter(s => s.dayOfWeek === date.getDay());
   };
 
-  const isOpen = (date) => businessDays[formatDate(date)] !== false;
+  const isOpen = (date) => {
+    const stored = businessDays[formatDate(date)];
+    if (stored !== undefined) return stored;
+    return !REGULAR_HOLIDAY_DAYS.includes(date.getDay());
+  };
 
   const handleSaveReservation = useCallback((form) => {
     if (modal?.reservation) {
@@ -74,6 +78,7 @@ export default function Calendar() {
 
   return (
     <div className="calendar-container">
+      <p className="page-app-name">すぎやシフト/予約アプリ</p>
       <div className="calendar-header">
         <button className="nav-btn" onClick={prevMonth}>&#8249;</button>
         <h2>{formatMonthYear(year, month)}</h2>
